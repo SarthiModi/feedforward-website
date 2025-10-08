@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipient Dashboard - Feed Forward</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .logout {
+      text-align: center;
+    }
+
+    .logout a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .logout a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Available Food Donations</h2>
+
+    {% if donations %}
+    <table>
+      <tr>
+        <th>Donor Email</th>
+        <th>Food Name</th>
+        <th>Quantity</th>
+        <th>Expiry Date</th>
+        <th>Pickup Address</th>
+        <th>Contact Number</th>
+      </tr>
+      {% for donation in donations %}
+      <tr>
+        <td>{{ donation[0] }}</td>  
+        <td>{{ donation[1] }}</td>  
+        <td>{{ donation[2] }}</td> 
+        <td>{{ donation[3] }}</td>  
+        <td>{{ donation[4] }}</td>  
+        <td>{{ donation[5] }}</td>  
+
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+      <p>No donations available at the moment.</p>
+    {% endif %}
+
+    <div class="logout">
+      <a href="/logout">Logout</a>
+    </div>
+  </div>
+</body>
+</html>

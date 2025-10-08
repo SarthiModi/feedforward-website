@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donor Dashboard - Feed Forward</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      background-color: #fff;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .logout {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .logout a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .logout a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome,{{donor}}!</h2>
+    <form action="/donor_dashboard" method="POST">
+      <label for="foodName">Food Name:</label>
+      <input type="text" id="foodName" name="foodName" required>
+
+      <label for="quantity">Quantity (in kg / items):</label>
+      <input type="text" id="quantity" name="quantity" required>
+
+      <label for="expiryDate">Expiry Date:</label>
+      <input type="date" id="expiryDate" name="expiryDate" required>
+
+      <label for="pickupAddress">Pickup Address:</label>
+      <textarea id="pickupAddress" name="pickupAddress" rows="3" required></textarea>
+
+      <label for="contactNumber">Contact Number:</label>
+      <input type="text" id="contactNumber" name="contactNumber" required>
+
+      <button type="submit">Submit Donation</button>
+    </form>
+
+    <div class="logout">
+      <a href="/logout">Logout</a>
+    </div>
+  </div>
+</body>
+</html>
