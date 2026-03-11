@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Cart</title>
+<style>
+body { font-family: Arial,sans-serif; background-color: #f2f2f2; margin:0; padding:0; }
+.container { max-width:800px; margin:40px auto; padding:20px; background:#fff; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+h2 { text-align:center; margin-bottom:20px; color:#333; }
+table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+th,td { padding:10px; border:1px solid #ccc; text-align:center; }
+th { background-color:#007bff; color:white; }
+button { background-color:#007bff; color:white; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; }
+button:hover { background-color:#0056b3; }
+.top-bar { text-align:right; margin-bottom:20px; }
+.top-bar a { margin-left:15px; color:#007bff; text-decoration:none; font-weight:bold; }
+.top-bar a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="top-bar">
+<a href="/recipient_dashboard">Back to Dashboard</a>
+<a href="/logout">Logout</a>
+</div>
+
+<h2>Your Cart</h2>
+
+{% if cart_items %}
+<table>
+<tr><th>Food Name</th><th>Quantity</th><th>Donor Email</th><th>Pickup/Delivery</th></tr>
+{% for item in cart_items %}
+<tr>
+<td>{{ item[1] }}</td>
+<td>{{ item[2] }}</td>
+<td>{{ item[3] }}</td>
+<td>
+<!-- Redirect to Confirm Order page -->
+<form method="GET" action="{{ url_for('confirm_order', cart_id=item[0]) }}">
+<button type="submit">Proceed to Confirm</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+</div>
+</body>
+</html>
+
+

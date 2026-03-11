@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirm Order — Feed Forward</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <style>
+    body { background:#f6f9ff; font-family:"Poppins",sans-serif; }
+    .container-split { max-width:1100px; margin:28px auto; }
+    .panel { background:white; border-radius:12px; padding:20px; box-shadow:0 8px 25px rgba(8,30,60,0.08); }
+    .map-panel { height:500px; border-radius:12px; overflow:hidden; }
+    .courier-emoji { font-size:26px; text-shadow:0 3px 6px rgba(0,0,0,0.25); }
+    .fare-box { background:#eef6ff; border-radius:10px; padding:12px; }
+  </style>
+</head>
+<body>
+  <div class="container-split">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h3 style="color:#0b5ed7;">Confirm Your Order</h3>
+        <small>Donation ID: <strong>{{ donation_id }}</strong></small>
+      </div>
+      <a href="/view_cart" class="btn btn-outline-secondary btn-sm">Back to Cart</a>
+    </div>
+
+    <div class="row g-4">
+      <!-- Left Panel -->
+      <div class="col-lg-5">
+        <div class="panel">
+          <form id="confirmForm" method="POST">
+            <label class="fw-semibold">Pickup Address</label>
+            <p class="text-muted small">{{ pickup_address }}</p>
+
+            <label class="fw-semibold">Delivery Option</label><br>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="delivery_choice" value="pickup" checked>
+              <label class="form-check-label">Pickup (Self collect)</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="delivery_choice" value="delivery">
+              <label class="form-check-label">Delivery (Request courier)</label>
+            </div>
+
+            <div class="mb-3" id="deliveryBox" style="display:none;">
+              <label for="delivery_address" class="fw-semibold">Delivery Address</label>
+              <input type="text" id="delivery_address" name="delivery_address" class="form-control" placeholder="Enter your address">
+            </div>
+
+            <div id="coordSection" style="display:none;">
+              <label class="fw-semibold">Recipient Coordinates</label>
+              <div class="d-flex gap-2 mb-2">
+                <input type="text" class="form-control" name="recipient_lat" id="recipient_lat" placeholder="Latitude">
+                <input type="text" class="form-control" name="recipient_lon" id="recipient_lon" placeholder="Longitude">
+              </div>
+              <div class="mb-3">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="detectRecipientLocation()">📍 Detect Location</button>
+                <button type="button" class="btn btn-sm btn-primary ms-2" onclick="calcFare()">Calculate Fare</button>
+              </div>
+            </div>
+
+            <div class="fare-box mb-3" id="fareBox" style="display:none;">
+              <strong id="distanceText">Estimated Distance: 0 km</strong><br>
+              <div>Fare: <span id="fareText" style="font-weight:bold;">₹0</span></div>
+              <div class="progress mt-2">
+                <div id="deliverProgress" class="progress-bar bg-primary" style="width:0%"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" id="confirmBtn">Confirm Order</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Map Panel -->
+      <div class="col-lg-7" id="mapPanel" style="display:none;">
+        <div class="panel map-panel">
+          <div id="confirmMap" style="height:100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Donor coordinates
+    const donorLat = parseFloat({{ donor_lat|default(30.3165) }});
+    const donorLon = parseFloat({{ donor_lon|default(78.0322) }});
+    const farePerKm = 19.0;
+
+    // Initialize map (hidden by default)
+    const map = L.map('confirmMap').setView([donorLat, donorLon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+    const donorMarker = L.marker([donorLat, donorLon]).addTo(map).bindPopup('Donor Location');
+
+    let recipMarker, courierMarker, line, anim;
+
+    // Toggle UI visibility
+    document.querySelectorAll('input[name="delivery_choice"]').forEach(radio=>{
+      radio.addEventListener('change', ()=>{
+        if(radio.checked && radio.value === 'delivery'){
+          document.getElementById('deliveryBox').style.display = 'block';
+          document.getElementById('coordSection').style.display = 'block';
+          document.getElementById('fareBox').style.display = 'block';
+          document.getElementById('mapPanel').style.display = 'block';
+          setTimeout(() => { map.invalidateSize(); map.setView([donorLat, donorLon], 13); }, 200);
+
+        } else if(radio.checked && radio.value === 'pickup'){
+          document.getElementById('deliveryBox').style.display = 'none';
+          document.getElementById('coordSection').style.display = 'none';
+          document.getElementById('fareBox').style.display = 'none';
+          document.getElementById('mapPanel').style.display = 'none';
+        }
+      });
+    });
+
+    // Detect user location
+    function detectRecipientLocation(){
+      if (!navigator.geolocation) return alert('Geolocation not supported.');
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const lat = pos.coords.latitude.toFixed(6);
+        const lon = pos.coords.longitude.toFixed(6);
+        document.getElementById('recipient_lat').value = lat;
+        document.getElementById('recipient_lon').value = lon;
+        placeRecipient(lat, lon);
+      }, ()=>alert('Failed to detect location.'));
+    }
+
+    // Place recipient marker
+    function placeRecipient(lat, lon){
+      const la=parseFloat(lat), lo=parseFloat(lon);
+      if(recipMarker) map.removeLayer(recipMarker);
+      recipMarker = L.marker([la,lo]).addTo(map).bindPopup('Recipient Location');
+      map.fitBounds([[donorLat,donorLon],[la,lo]],{padding:[50,50]});
+    }
+
+    // Haversine formula
+    function haversine(lat1, lon1, lat2, lon2){
+      const R=6371,toRad=x=>x*Math.PI/180;
+      const dLat=toRad(lat2-lat1),dLon=toRad(lon2-lon1);
+      const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+      return 2*R*Math.asin(Math.sqrt(a));
+    }
+
+    // Only calculate fare
+    function calcFare(){
+      const lat=parseFloat(document.getElementById('recipient_lat').value);
+      const lon=parseFloat(document.getElementById('recipient_lon').value);
+      if(isNaN(lat)||isNaN(lon)) return alert('Enter valid coordinates.');
+      placeRecipient(lat, lon);
+
+      const dist=haversine(donorLat, donorLon, lat, lon);
+      const fare=(dist*farePerKm).toFixed(2);
+      document.getElementById('distanceText').textContent=`Estimated Distance: ${dist.toFixed(2)} km`;
+      document.getElementById('fareText').textContent=`₹${fare}`;
+    }
+
+    // Animation triggered only on submit
+    document.getElementById('confirmForm').addEventListener('submit', (e)=>{
+      const deliveryChoice = document.querySelector('input[name="delivery_choice"]:checked').value;
+      if(deliveryChoice === 'pickup'){
+        return true; // normal form submission, no animation
+      }
+      e.preventDefault(); // prevent instant submission to show animation
+
+      const lat=parseFloat(document.getElementById('recipient_lat').value);
+      const lon=parseFloat(document.getElementById('recipient_lon').value);
+      if(isNaN(lat)||isNaN(lon)) return alert('Enter valid coordinates or detect location.');
+
+      if(line) map.removeLayer(line);
+      if(courierMarker) map.removeLayer(courierMarker);
+      if(anim) clearInterval(anim);
+
+      line = L.polyline([[donorLat, donorLon],[lat, lon]], {color:'#0b5ed7'}).addTo(map);
+      const dist=haversine(donorLat, donorLon, lat, lon);
+      const steps=250;
+      const coords=[];
+      for(let i=0;i<=steps;i++){
+        const t=i/steps;
+        coords.push([donorLat+(lat-donorLat)*t, donorLon+(lon-donorLon)*t]);
+      }
+
+      const courierIcon = L.divIcon({
+        html:'<div class="courier-emoji">🚴</div>',
+        className:'',
+        iconSize:[30,30],
+        iconAnchor:[15,15]
+      });
+      courierMarker = L.marker(coords[0],{icon:courierIcon}).addTo(map);
+
+      const progress=document.getElementById('deliverProgress');
+      let idx=0;
+      anim=setInterval(()=>{
+        if(idx>=coords.length){
+          clearInterval(anim);
+          progress.style.width='100%';
+          progress.textContent='100%';
+          courierMarker.bindPopup('Delivery complete!').openPopup();
+          // Now submit the form
+          document.getElementById('confirmForm').submit();
+          return;
+        }
+        courierMarker.setLatLng(coords[idx]);
+        const pct=Math.round((idx/coords.length)*100);
+        progress.style.width=pct+'%';
+        progress.textContent=pct+'%';
+        idx++;
+      },40);
+    });
+  </script>
+</body>
+</html>
+
+
+
