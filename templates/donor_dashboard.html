@@ -5,78 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Donor Dashboard - Feed Forward</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 500px;
-      background-color: #fff;
-      margin: 50px auto;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #555;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #218838;
-    }
-
-    .logout {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .logout a {
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    .logout a:hover {
-      text-decoration: underline;
-    }
+    body { font-family: Arial, sans-serif; background-color: #f2f2f2; margin: 0; padding: 0; }
+    .container { max-width: 500px; background-color: #fff; margin: 50px auto; padding: 30px;
+      border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; margin-bottom: 20px; color: #333; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+    input, textarea { width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc;
+      border-radius: 4px; font-size: 14px; }
+    button { background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 4px;
+      cursor: pointer; width: 100%; font-size: 16px; }
+    button:hover { background-color: #218838; }
+    .logout { text-align: center; margin-top: 20px; }
+    .logout a { color: #007bff; text-decoration: none; }
+    .logout a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Welcome,{{donor}}!</h2>
-    <form action="/donor_dashboard" method="POST">
+    <h2>Welcome, {{ donor }}!</h2>
+    <div style="text-align:center; margin-bottom:20px;">
+  <a href="/my_donations" style="background:#007bff; color:white; padding:8px 15px; border-radius:5px; text-decoration:none;">📦 View My Donations</a>
+  <a href="/view_recipients" style="background:#28a745; color:white; padding:8px 15px; border-radius:5px; text-decoration:none;">👥 View Recipients</a>
+</div>
+
+
+    <form action="/donor_dashboard" method="POST" enctype="multipart/form-data">
       <label for="foodName">Food Name:</label>
       <input type="text" id="foodName" name="foodName" required>
 
@@ -89,8 +42,17 @@
       <label for="pickupAddress">Pickup Address:</label>
       <textarea id="pickupAddress" name="pickupAddress" rows="3" required></textarea>
 
+      <!-- New Location Fields -->
+      <label>Pickup Coordinates:</label>
+      <input type="text" id="pickupLat" name="pickupLat" placeholder="Latitude" readonly required>
+      <input type="text" id="pickupLon" name="pickupLon" placeholder="Longitude" readonly required>
+      <button type="button" onclick="getLocation()">📍 Auto Detect My Location</button>
+
       <label for="contactNumber">Contact Number:</label>
       <input type="text" id="contactNumber" name="contactNumber" required>
+
+      <label for="foodImage">Upload Food Image:</label>
+      <input type="file" id="foodImage" name="foodImage" accept="image/*" required>
 
       <button type="submit">Submit Donation</button>
     </form>
@@ -99,5 +61,24 @@
       <a href="/logout">Logout</a>
     </div>
   </div>
+
+  <script>
+  function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          document.getElementById("pickupLat").value = position.coords.latitude.toFixed(6);
+          document.getElementById("pickupLon").value = position.coords.longitude.toFixed(6);
+          alert("Location detected successfully!");
+        },
+        function(error) {
+          alert("Unable to get location. Please enter coordinates manually.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  }
+  </script>
 </body>
 </html>
