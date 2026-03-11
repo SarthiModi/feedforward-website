@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipients List</title>
+<style>
+body { font-family: Arial,sans-serif; background-color: #f2f2f2; margin:0; padding:0; }
+.container { max-width:800px; margin:40px auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+h2 { text-align:center; color:#333; margin-bottom:20px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:10px; border:1px solid #ccc; text-align:center; }
+th { background:#007bff; color:white; }
+.top-bar { text-align:right; margin-bottom:20px; }
+.top-bar a { margin-left:15px; color:#007bff; text-decoration:none; font-weight:bold; }
+.top-bar a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="top-bar">
+<a href="/donor_dashboard">Add Donation</a>
+<a href="/my_donations">My Donations</a>
+<a href="/logout">Logout</a>
+</div>
+
+<h2>Registered Recipients</h2>
+{% if recipients %}
+<table>
+<tr><th>Name</th><th>Email</th></tr>
+{% for rec in recipients %}
+<tr><td>{{ rec[0] }}</td><td>{{ rec[1] }}</td></tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No recipients found.</p>
+{% endif %}
+</div>
+</body>
+</html>

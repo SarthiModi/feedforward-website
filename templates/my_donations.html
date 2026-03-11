@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Donations - Feed Forward</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 950px;
+      background: #fff;
+      margin: 40px auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+    }
+    h3 {
+      color: #007bff;
+      margin-top: 35px;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      font-size: 15px;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+    img {
+      width: 80px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .status {
+      padding: 6px 10px;
+      border-radius: 5px;
+      color: #fff;
+      font-weight: bold;
+    }
+    .status.Delivered {
+      background: #28a745;
+    }
+    /* Top buttons */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .btn {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: 0.3s;
+      font-size: 14px;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+    .btn.logout {
+      background: #dc3545;
+    }
+    .btn.logout:hover {
+      background: #b52a37;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <a href="/donor_dashboard" class="btn">➕ Add New Donation</a>
+      <h2>My Donations</h2>
+      <a href="/logout" class="btn logout">🚪 Logout</a>
+    </div>
+
+    <h3>📦 Active Donations</h3>
+    {% if active_donations %}
+    <table>
+      <tr><th>Image</th><th>Food Name</th><th>Quantity</th><th>Expiry</th></tr>
+      {% for d in active_donations %}
+      <tr>
+        <td><img src="{{ url_for('static', filename=d[4]) }}" alt="food"></td>
+        <td>{{ d[1] }}</td>
+        <td>{{ d[2] }}</td>
+        <td>{{ d[3] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+      <p>No active donations.</p>
+    {% endif %}
+
+    <h3>✅ Delivered Donations</h3>
+    {% if delivered_donations %}
+    <table>
+      <tr><th>Image</th><th>Food Name</th><th>Quantity</th><th>Recipient</th><th>Address</th><th>Fare</th><th>Status</th></tr>
+      {% for d in delivered_donations %}
+      <tr>
+        <td><img src="{{ url_for('static', filename=d[6]) }}" alt="food"></td>
+        <td>{{ d[0] }}</td>
+        <td>{{ d[1] }}</td>
+        <td>{{ d[5] }}</td>
+        <td>{{ d[2] }}</td>
+        <td>₹{{ d[3] }}</td>
+        <td><span class="status Delivered">{{ d[4] }}</span></td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+      <p>No delivered donations yet.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
