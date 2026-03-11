@@ -1,97 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recipient Dashboard - Feed Forward</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recipient Dashboard — Feed Forward</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      margin: 0;
-      padding: 0;
-    }
+    body { background: #f4f7fb; font-family: "Poppins", sans-serif; }
+    .top-bar { text-align:right; margin-bottom:15px; }
+    .card-donation { transition: transform .18s ease, box-shadow .18s ease; border: 0; border-radius: 12px; }
+    .card-donation:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(8,30,60,0.12); }
+    .food-image { width: 100px; height: 80px; object-fit: cover; border-radius: 8px; }
 
-    .container {
-      max-width: 800px;
-      margin: 50px auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-    }
+    .map-wrapper { max-width: 900px; margin: 20px auto; }
+    .map-persistent { height: 280px; border-radius: 14px; overflow: hidden; }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    .logout {
-      text-align: center;
-    }
-
-    .logout a {
-      color: #007bff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .logout a:hover {
-      text-decoration: underline;
-    }
+    .dashboard-container { max-width: 1100px; margin: 28px auto; padding: 18px; }
+    .brand { color: #0b5ed7; font-weight: 700; font-size: 1.2rem; }
+    .track-badge { background: linear-gradient(90deg,#0b5ed7,#0a58ca); color: white; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; }
+    footer.small-note { text-align:center; margin: 12px 0 40px 0; color:#556; font-size: 0.9rem;}
   </style>
+
 </head>
 <body>
-  <div class="container">
-    <h2>Available Food Donations</h2>
 
-    {% if donations %}
-    <table>
-      <tr>
-        <th>Donor Email</th>
-        <th>Food Name</th>
-        <th>Quantity</th>
-        <th>Expiry Date</th>
-        <th>Pickup Address</th>
-        <th>Contact Number</th>
-      </tr>
-      {% for donation in donations %}
-      <tr>
-        <td>{{ donation[0] }}</td>  
-        <td>{{ donation[1] }}</td>  
-        <td>{{ donation[2] }}</td> 
-        <td>{{ donation[3] }}</td>  
-        <td>{{ donation[4] }}</td>  
-        <td>{{ donation[5] }}</td>  
+  <div class="dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <div class="brand">Feed Forward</div>
+        <div class="text-muted" style="font-size:0.9rem;">Available food donations near you</div>
+      </div>
+      <div class="top-bar">
+        <a class="me-3 text-decoration-none" href="/view_cart">View Cart</a>
+        <a class="text-decoration-none" href="/logout">Logout</a>
+      </div>
+    </div>
 
-      </tr>
-      {% endfor %}
-    </table>
-    {% else %}
-      <p>No donations available at the moment.</p>
-    {% endif %}
+    <div class="row g-4 mb-3" id="donationContainer">
+      {% if donations %}
+        {% for donation in donations %}
+          <div class="col-md-6 col-lg-4 donation-card">
+            <div class="card card-donation p-3 bg-white shadow-sm">
 
-    <div class="logout">
-      <a href="/logout">Logout</a>
+              <div class="d-flex gap-3">
+                <div>
+                  {% if donation[7] %}
+                    <img src="{{ url_for('static', filename=donation[7]) }}" class="food-image">
+                  {% else %}
+                    <img src="{{ url_for('static', filename='default_food.jpg') }}" class="food-image">
+                  {% endif %}
+                </div>
+
+                <div class="flex-grow-1">
+                  <h5 class="mb-1">{{ donation[2] }}</h5>
+                  <p class="text-muted mb-1">By: <strong>{{ donation[1] }}</strong></p>
+                  <p class="text-muted mb-1">Qty: <strong>{{ donation[3] }}</strong> · Expires: <strong>{{ donation[4] }}</strong></p>
+                  <p class="text-muted mb-1">Pickup: {{ donation[5] }}</p>
+
+                  <div class="d-flex justify-content-between mt-2">
+                    <div>
+                      <button class="btn btn-sm btn-outline-primary btn-add-cart" data-donation-id="{{ donation[0] }}">
+                        Add to Cart
+                      </button>
+
+                      <button class="btn btn-sm btn-primary ms-2 btn-focus-map" data-donation-id="{{ donation[0] }}">
+                        Focus on Map
+                      </button>
+                    </div>
+
+                    <div class="text-end">
+                      <span class="track-badge">Contact</span>
+                      <div class="text-muted">{{ donation[6] }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hidden metadata (used for map logic) -->
+              <div class="d-none donation-meta" data-id="{{ donation[0] }}"></div>
+
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- View More Button -->
+    <div class="text-center my-4">
+      <button id="viewMoreBtn" class="btn btn-primary px-4">View More</button>
     </div>
   </div>
+
+  <!-- Map -->
+  <div class="map-wrapper">
+    <div id="liveMap" class="map-persistent"></div>
+    <footer class="small-note">Live delivery view (demo mode)</footer>
+  </div>
+
+
+<script>
+/* ---------------------------
+   SHOW ONLY 6 CARDS INITIALLY
+----------------------------- */
+const cards = document.querySelectorAll(".donation-card");
+let visible = 6;
+
+function showCards() {
+  cards.forEach((c, i) => c.style.display = i < visible ? "block" : "none");
+  if (visible >= cards.length) document.getElementById("viewMoreBtn").style.display = "none";
+}
+
+showCards();
+document.getElementById("viewMoreBtn").addEventListener("click", () => {
+  visible += 6;
+  showCards();
+});
+
+
+/* ---------------------------
+   LEAFLET MAP INITIALIZATION
+----------------------------- */
+function donorCoordsFromId(id) {
+  const baseLat = 30.3165, baseLon = 78.0322;
+  const n = Number(id);
+  return [
+    baseLat + ((n * 97) % 100) * 0.0005,
+    baseLon + ((n * 57) % 100) * 0.0005
+  ];
+}
+
+const map = L.map("liveMap").setView([30.3165, 78.0322], 11);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19
+}).addTo(map);
+
+const markerLayer = L.layerGroup().addTo(map);
+
+const donationCoords = [];
+document.querySelectorAll(".donation-meta").forEach(el => {
+  const id = el.dataset.id;
+  const coords = donorCoordsFromId(id);
+  donationCoords.push({ id, coords });
+
+  L.marker(coords).addTo(markerLayer).bindPopup(`Donor #${id}`);
+});
+
+map.fitBounds(markerLayer.getLayers().map(m => m.getLatLng()));
+
+
+/* ---------------------------
+   FOCUS ON MAP 
+----------------------------- */
+document.querySelectorAll(".btn-focus-map").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.donationId;
+    const d = donationCoords.find(x => x.id === id);
+    if (!d) return;
+    map.setView(d.coords, 14, { animate: true });
+  });
+});
+
+
+/* ---------------------------
+   ADD TO CART 
+----------------------------- */
+document.querySelectorAll(".btn-add-cart").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const donationId = btn.dataset.donationId;
+
+    const res = await fetch('/add_to_cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ donation_id: parseInt(donationId) })
+    });
+
+    alert(await res.text());
+  });
+});
+
+</script>
+
 </body>
 </html>
