@@ -3,61 +3,379 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Selection</title>
+  <title>Feed Forward | Share Food, Spread Hope</title>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .container {
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 300px;
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #fefefe;
+      color: #333;
+      scroll-behavior: smooth;
+      line-height: 1.6;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #5bc0de, #0275d8);
+      padding: 15px 40px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #ffe082;
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 60px 10%;
+      background: linear-gradient(120deg, #fff, #e3f2fd);
+    }
+
+    .hero-content {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .hero-content h1 {
+      font-size: 2.8rem;
+      color: #0275d8;
+      margin-bottom: 15px;
+    }
+
+    .hero-content p {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .hero-content a {
+      background: #0275d8;
+      color: white;
+      text-decoration: none;
+      padding: 12px 25px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: background 0.3s ease;
+    }
+
+    .hero-content a:hover {
+      background: #0256a3;
+    }
+
+    .hero-image {
+      flex: 1;
+      min-width: 300px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .hero-image img {
+      width: 90%;
+      max-width: 420px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    .action-section {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 60px 10%;
+      background: #f9fafc;
       text-align: center;
     }
 
-    h2 {
-      margin-bottom: 15px;
-      color: #333;
+    .action-box {
+      flex: 1;
+      min-width: 280px;
+      max-width: 400px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      padding: 30px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    p {
-      margin-bottom: 20px;
+    .action-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .action-box img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .action-box h3 {
+      color: #0275d8;
+      margin-bottom: 10px;
+    }
+
+    .action-box p {
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .action-box a {
+      background: #0275d8;
+      color: white;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .action-box a:hover {
+      background: #0256a3;
+    }
+
+    .how-it-works {
+      background: #e3f2fd;
+      padding: 70px 10%;
+      text-align: center;
+    }
+
+    .how-it-works h2 {
+      color: #0275d8;
+      margin-bottom: 40px;
+      font-size: 2rem;
+    }
+
+    .steps {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .step {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      width: 280px;
+    }
+
+    .step h3 {
+      color: #0275d8;
+      margin-bottom: 10px;
+    }
+
+    .step p {
       color: #555;
     }
 
-    a {
-      display: block;
-      background-color: #007bff;
-      color: white;
-      padding: 10px 0;
-      border-radius: 4px;
-      text-decoration: none;
-      margin-bottom: 10px;
-      font-size: 15px;
+    .impact {
+      text-align: center;
+      padding: 70px 10%;
+      background: #fff;
     }
 
-    a:hover {
-      background-color: #0056b3;
+    .impact h2 {
+      color: #0275d8;
+      margin-bottom: 30px;
+    }
+
+    .impact-stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+
+    .stat {
+      background: #f0f7ff;
+      padding: 25px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .stat h3 {
+      font-size: 1.8rem;
+      color: #0275d8;
+    }
+
+    .stat p {
+      color: #555;
+    }
+
+    .contact {
+      background: #0275d8;
+      color: white;
+      text-align: center;
+      padding: 60px 10%;
+    }
+
+    .contact h2 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+
+    .contact p {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      background: #0256a3;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .hero-image {
+        margin-top: 30px;
+      }
+
+      .steps {
+        flex-direction: column;
+        align-items: center;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <h2>Feed Forward Page</h2>
-    <p>Please choose your role:</p>
 
-    <a href="/donor_login">Donor</a>
-    <a href="/recipiant_login">Recipient</a>
+  <nav>
+    <div class="logo">Feed Forward</div>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="/about">About Us</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
 
-  </div>
+  
+  <section id="home" class="hero">
+    <div class="hero-content">
+      <h1>Share Food, Spread Hope</h1>
+      <p>Feed Forward connects restaurants, donors, and NGOs to ensure that excess food reaches those who need it most — reducing waste and hunger, one meal at a time.</p>
+    </div>
+
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=900&q=60" alt="Food donation">
+    </div>
+  </section>
+
+  
+  <section class="action-section">
+    <div class="action-box">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQyywgQU_p_RBGP5oJ-eSBhlX5OTKuktg7Bw&s" alt="Donor">
+      <h3>Become a Donor</h3>
+      <p>Restaurants and individuals can easily share surplus food through our platform to help those in need.</p>
+      <a href="/donor_login">Donor Login</a>
+    </div>
+
+    <div class="action-box">
+      <img src="https://images.unsplash.com/photo-1606112219348-204d7d8b94ee?auto=format&fit=crop&w=900&q=60" alt="Recipient">
+      <h3>Join as a Recipient</h3>
+      <p>NGOs and individuals in need can sign up to receive food donations from verified sources.</p>
+      <a href="/recipient_login">Recipient Login</a>
+    </div>
+  </section>
+
+ 
+  <section id="how" class="how-it-works">
+    <h2>How Feed Forward Works</h2>
+    <div class="steps">
+      <div class="step">
+        <h3> Donate Food</h3>
+        <p>Donors register leftover food safely and list it on our platform for collection.</p>
+      </div>
+      <div class="step">
+        <h3> Connect</h3>
+        <p>Nearby NGOs or recipients get notified about available food donations.</p>
+      </div>
+      <div class="step">
+        <h3> Deliver & Serve</h3>
+        <p>Our partner volunteers or NGOs collect and distribute the food to the needy.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="impact">
+    <h2>Our Impact</h2>
+    <div class="impact-stats">
+      <div class="stat">
+        <h3>100+</h3>
+        <p>Meals Shared</p>
+      </div>
+      <div class="stat">
+        <h3>50+</h3>
+        <p>Active Donors</p>
+      </div>
+      <div class="stat">
+        <h3>10</h3>
+        <p>Partner NGOs</p>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="contact" class="contact">
+    <h2>Contact Us</h2>
+    <p>Email: support@feedforward.org</p>
+    <p>Phone: +91 9999 9999</p>
+    <p>Address: Dehradun, India</p>
+  </section>
+
+ 
+  <footer>
+    &copy; 2025 Feed Forward | Made with &hearts; to fight hunger
+  </footer>
 </body>
 </html>
